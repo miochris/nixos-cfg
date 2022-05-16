@@ -57,8 +57,10 @@ in
   # };
 
   # Enable the X11 windowing system.
-  # seems not changing dpi
   services.xserver.dpi = 270;
+  services.xserver.libinput.touchpad.naturalScrolling = true;
+
+
 
 
   # Enable the GNOME Desktop Environment.
@@ -164,7 +166,7 @@ in
     cores = 0
     build-users-group = nixbld
     builders = eu.nixbuild.net x86_64-linux - 100 1 kvm
-    builders-use-substitutes = true
+    builders-use-substitutes = false
     substituters = ssh://eu.nixbuild.net https://cache.nixos.org
     trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nixbuild.net/hanson-1:8vs6faNhikVc8S+o64zsR8bqlS1vitC2HAYk6xpyE3M=
     experimental-features = nix-command flakes
