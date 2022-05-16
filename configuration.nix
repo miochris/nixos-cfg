@@ -117,7 +117,7 @@ in
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.${user}= {
     isNormalUser = true;
-    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "wheel" "docker" ]; # Enable ‘sudo’ for the user.
     initialPassword = "password";
     shell = pkgs.zsh;
   };
@@ -176,6 +176,8 @@ in
   nix = {
     package = pkgs.nixFlakes;
   };
+
+  virtualisation.docker.enable = true;
 
 }
 
