@@ -4,7 +4,7 @@
 
 { config, pkgs, ... }:
 let
-  user="qiang";
+  user = "qiang";
   myKbLayout = pkgs.writeText "xkb-layout" ''
     ! swap ctrl and caps
     remove Lock = Caps_Lock
@@ -14,12 +14,10 @@ let
     add Lock = Caps_Lock
     add Control = Control_L
   '';
-in
-{
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+in {
+  imports = [ # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+  ];
 
   # Use the systemd-boot EFI boot loader.
   # boot.loader.systemd-boot.enable = true;
@@ -42,7 +40,7 @@ in
   # Per-interface useDHCP will be mandatory in the future, so this generated config
   # replicates the default behaviour.
   networking.useDHCP = false;
-  networking.interfaces.enp60s0.useDHCP = true;
+  # networking.interfaces.enp60s0.useDHCP = true;
   networking.interfaces.wlp0s20f3.useDHCP = true;
 
   # Configure network proxy if necessary
@@ -59,9 +57,6 @@ in
   # Enable the X11 windowing system.
   services.xserver.dpi = 270;
   services.xserver.libinput.touchpad.naturalScrolling = true;
-
-
-
 
   # Enable the GNOME Desktop Environment.
   # services.xserver.enable = true;
@@ -82,30 +77,44 @@ in
     };
 
     displayManager = {
-        defaultSession = "none+i3";
-	gdm.enable = true;
-        sessionCommands = "${pkgs.xorg.xmodmap}/bin/xmodmap ${myKbLayout}"; # swap ctrl and caps
+      defaultSession = "none+i3";
+      gdm.enable = true;
+      sessionCommands =
+        "${pkgs.xorg.xmodmap}/bin/xmodmap ${myKbLayout}"; # swap ctrl and caps
     };
 
     windowManager.i3 = {
       enable = true;
       package = pkgs.i3; # i3-gaps
-       extraPackages = with pkgs; [
-         dmenu #application launcher most people use
-         i3status # gives you the default i3 status bar
-         i3lock #default i3 screen locker
-         # i3blocks #if you are planning on using i3blocks over i3status
-       ];
+      extraPackages = with pkgs; [
+        dmenu # application launcher most people use
+        i3status # gives you the default i3 status bar
+        i3lock # default i3 screen locker
+        # i3blocks #if you are planning on using i3blocks over i3status
+      ];
     };
   };
-
 
   # Configure keymap in X11
   # services.xserver.layout = "us";
   # services.xserver.xkbOptions = "eurosign:e";
 
   # Enable CUPS to print documents.
-  # services.printing.enable = true;
+  services.printing.enable = true;
+  services.printing.drivers = [ pkgs.brlaser ]; # brothers printer driver
+  services.printing.browsing = true;
+  services.printing.browsedConf = ''
+    BrowseDNSSDSubTypes _cups,_print
+    BrowseLocalProtocols all
+    BrowseRemoteProtocols all
+    CreateIPPPrinterQueues All
+
+    BrowseProtocols all
+      '';
+  services.avahi = {
+    enable = true;
+    nssmdns = true;
+  };
 
   # Enable sound.
   # sound.enable = true;
@@ -115,7 +124,7 @@ in
   # services.xserver.libinput.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.${user}= {
+  users.users.${user} = {
     isNormalUser = true;
     extraGroups = [ "wheel" "docker" ]; # Enable ‘sudo’ for the user.
     initialPassword = "password";
@@ -159,6 +168,37 @@ in
   system.stateVersion = "21.11"; # Did you read the comment?
 
   #-----------------------added ones-------------------------
+  # i18n.inputMethod = {
+  #   #fcitx5.addons = with pkgs; [
+  #   #  fcitx5-rime
+  #   #  fcitx5-chinese-addons
+  #   #];
+  #   enabled = "fcitx";
+  #   fcitx.engines = with pkgs.fcitx-engines; [ cloudpinyin ];
+
+  #   # enabled = "ibus";
+  #   # ibus.engines = with pkgs.ibus-engines; [
+  #   #   libpinyin
+  #   #   rime
+  #   # ];
+  # };
+
+
+  fonts = {
+    fontconfig.enable = true;
+    fontDir.enable = true;
+    fonts = with pkgs; [
+      noto-fonts
+      noto-fonts-cjk
+      noto-fonts-emoji
+      liberation_ttf
+      fira-code
+      fira-code-symbols
+      mplus-outline-fonts
+      dina-font
+      proggyfonts
+    ];
+  };
 
   nix.extraOptions = ''
     auto-optimise-store = true
@@ -173,9 +213,7 @@ in
   '';
 
   nixpkgs.config.allowUnfree = true;
-  nix = {
-    package = pkgs.nixFlakes;
-  };
+  nix = { package = pkgs.nixFlakes; };
 
   virtualisation.docker.enable = true;
 
